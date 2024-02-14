@@ -26,34 +26,23 @@ class ChatGPTClass extends CoreClass {
 
   handleMsg = async (ctx) => {
 
-    const state = {
-      getMyState: this.stateHandler.getMyState(ctx.from),
-      get: this.stateHandler.get(ctx.from),
-      getAllState: this.stateHandler.getAllState,
-      update: this.stateHandler.updateState(ctx),
-      clear: this.stateHandler.clear(ctx.from),
-    }
-
     const { from, body } = ctx
 
-    const conversationList = state.getMyState()?.conversationList ?? []
-    const interaccionChatGPT = await this.openai.sendMessage(body,
-      {
-        conversationId: !conversationList.length
-          ? undefined
-          : conversationList[conversationList.length - 1].conversationId,
-        parentMessageId: !conversationList.length
-          ? undefined
-          : conversationList[conversationList.length - 1].id,
-      });
+    const interaccionChatGPT = await this.openai.sendMessage(body, {
+      conversationId: !this.queue.length
+        ? undefined
+        : this.queue[this.queue.length - 1].conversationId,
+      parentMessageId: !this.queue.length
+        ? undefined
+        : this.queue[this.queue.length - 1].id,
+    });
 
-    conversationList.push(interaccionChatGPT);
+    this.queue.push(interaccionChatGPT);
     const parseMessage = {
       ...interaccionChatGPT,
       answer: interaccionChatGPT.text
     }
 
-    await state.update({ threadId: null, conversationList })
 
     this.sendFlowSimple([parseMessage], from)
   }
