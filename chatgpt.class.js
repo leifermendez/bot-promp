@@ -1,14 +1,11 @@
 require('dotenv').config();
-const { CoreClass } = require('@bot-whatsapp/bot');
 
-
-class ChatGPTClass extends CoreClass {
+class ChatGPTClass {
   queue = [];
   optionsGPT = { model: "gpt-3.5-turbo" };
   openai = undefined;
 
-  constructor(_database, _provider) {
-    super(null, _database, _provider)
+  constructor() {
     this.init().then();
   }
 
@@ -24,9 +21,7 @@ class ChatGPTClass extends CoreClass {
     );
   };
 
-  handleMsg = async (ctx) => {
-
-    const { from, body } = ctx
+  handleMsgChatGPT = async (body) => {
 
     const interaccionChatGPT = await this.openai.sendMessage(body, {
       conversationId: !this.queue.length
@@ -38,13 +33,7 @@ class ChatGPTClass extends CoreClass {
     });
 
     this.queue.push(interaccionChatGPT);
-    const parseMessage = {
-      ...interaccionChatGPT,
-      answer: interaccionChatGPT.text
-    }
-
-
-    this.sendFlowSimple([parseMessage], from)
+    return interaccionChatGPT
   }
 }
 
